@@ -2,53 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PostRequest;
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\PostResource;
+use App\Services\PostService;
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PostController extends Controller
 {
-    // Get all posts
-    public function index()
+    protected PostService $postService;
+
+    public function __construct(PostService $postService)
     {
-        return response()->json(Post::all(), 200);
+        $this->postService = $postService;
     }
 
-    // Create a new post
-    public function store(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+        $filters = $request->only(['status', 'type', 'author_id', 'sort']);
+        $posts = $this->postService->getFilteredPosts($filters);
+
+        return PostResource::collection($posts);
+    }
+
+    public function getBySlug($slug): JsonResponse
+    {
+        return response()->json($this->postService->getBySlug($slug));
+    }
+
+    public function show(Post $post): JsonResponse
+    {
+        return response()->json(new PostResource($post));
+    }
+
+    public function store(PostRequest $request): JsonResponse
+    {
+        $post = $this->postService->createPost($request->validated());
+        return response()->json([
+            'message' => 'Post created successfully.',
+            'post' => new PostResource($post),
+        ], 201);
+    }
+
+    public function update(PostRequest $request, Post $post): JsonResponse
+    {
+        $updatedPost = $this->postService->updatePost($post, $request->validated());
+        return response()->json([
+            'message' => 'Post updated successfully.',
+            'post' => new PostResource($updatedPost),
         ]);
-
-        $post = Post::create($request->all());
-
-        return response()->json($post, 201);
     }
 
-    // Get a single post by ID
-    public function show(Post $post)
+    public function destroy(Post $post): JsonResponse
     {
-        return response()->json($post, 200);
-    }
-
-    // Update a post
-    public function update(Request $request, Post $post)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-
-        $post->update($request->all());
-
-        return response()->json($post, 200);
-    }
-
-    // Delete a post
-    public function destroy(Post $post)
-    {
-        $post->delete();
-        return response()->json(['message' => 'Post deleted successfully'], 200);
+        $this->postService->deletePost($post);
+        return response()->json(['message' => 'Post deleted successfully.'], 200);
     }
 }
