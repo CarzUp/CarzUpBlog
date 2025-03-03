@@ -30,6 +30,11 @@ class PostService
         return $this->postRepository->getFilteredPosts($filters);
     }
 
+    public function getPostStatistics(): array
+    {
+        return $this->postRepository->getPostStatistics();
+    }
+
     public function getBySlug(string $slug): PostResource
     {
         $post = $this->postRepository->findBySlug($slug);

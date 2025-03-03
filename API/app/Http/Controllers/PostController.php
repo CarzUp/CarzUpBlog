@@ -28,6 +28,11 @@ class PostController extends Controller
         return PostResource::collection($posts);
     }
 
+    public function getPostStatistics(): JsonResponse
+    {
+        return response()->json($this->postService->getPostStatistics());
+    }
+
     public function getBySlug($slug): JsonResponse
     {
         return response()->json($this->postService->getBySlug($slug));

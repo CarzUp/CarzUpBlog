@@ -13,6 +13,35 @@ class PostRepository
         return Post::query()->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
+    public function getPostStatistics(): array
+    {
+        // Define all possible post types
+        $allTypes = ['review', 'event', 'news', 'technical', 'other'];
+
+        // Get post counts from the database
+        $postCounts = Post::query()
+            ->selectRaw('type, COUNT(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type')
+            ->toArray();
+
+        // Ensure all types are present in the response, even if they have zero posts
+        $counts = array_map(function ($type) use ($postCounts) {
+            return [
+                'type' => $type,
+                'total' => $postCounts[$type] ?? 0, // Default to 0 if not present
+            ];
+        }, $allTypes);
+
+        // Find the type with the least posts
+        $leastType = collect($counts)->sortBy('total')->first();
+
+        return [
+            'counts' => $counts,
+            'least_type' => $leastType
+        ];
+    }
+
     public function getFilteredPosts(array $filters): LengthAwarePaginator
     {
         $query = Post::query();

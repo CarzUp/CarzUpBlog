@@ -35,6 +35,8 @@ Route::middleware('api')->prefix('posts')->group(function () {
 
     Route::get('/slug/{slug}', [PostController::class, 'getBySlug']);
 
+    Route::get('/statistics/all', [PostController::class, 'getPostStatistics']);
+
     /**
      * @OA\Post(
      *     path="/api/posts",
