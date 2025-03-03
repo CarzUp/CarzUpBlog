@@ -33,14 +33,15 @@ export default function RootLayout({
   // const queryClient = new QueryClient();
 
   return (
-    <html lang="en">
-      {/*<QueryClientProvider client={queryClient}>*/}
+      <html>
+        {/*<QueryClientProvider client={queryClient}>*/}
           <TooltipProvider>
-              <Toaster/>
-              <Sonner/>
               <body
                   className={`${geistSans.variable} ${geistMono.variable} antialiased`}
               >
+              <Toaster/>
+              <Sonner/>
+
               <div className="flex flex-col min-h-screen">
                   <Navbar/>
 
@@ -52,7 +53,7 @@ export default function RootLayout({
               </div>
               </body>
           </TooltipProvider>
-      {/*</QueryClientProvider>*/}
-    </html>
+          {/*</QueryClientProvider>*/}
+      </html>
   );
 }

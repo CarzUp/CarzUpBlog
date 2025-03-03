@@ -1,6 +1,7 @@
-
+"use client";
 import { Facebook, Twitter, Linkedin, Copy, Mail } from 'lucide-react';
 import { toast } from '@components/ui/use-toast';
+import {useEffect, useState} from "react";
 
 interface SharePostProps {
   title: string;
@@ -8,7 +9,14 @@ interface SharePostProps {
 }
 
 const SharePost = ({ title, slug }: SharePostProps) => {
-  const baseUrl = window.location.origin;
+    const [baseUrl, setBaseUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setBaseUrl(window.location.origin);
+        }
+    }, []);
+
   const url = `${baseUrl}/post/${slug}`;
   
   const handleCopyLink = () => {

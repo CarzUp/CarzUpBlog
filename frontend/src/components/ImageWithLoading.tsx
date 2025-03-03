@@ -28,6 +28,8 @@ const ImageWithLoading = ({ src, alt, className = '' }: ImageWithLoadingProps) =
       ></div>
       {imageSrc && (
         <Image
+            width={500}
+            height={300}
           src={imageSrc}
           alt={alt}
           className={`absolute top-0 left-0 w-full h-full object-cover transition-all duration-700 ${
