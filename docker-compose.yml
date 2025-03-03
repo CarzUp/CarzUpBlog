@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
 
-  watchtower:
+  carzup-blog-watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     command:
@@ -17,7 +17,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   # PostgreSQL Database for Laravel API
-  db:
+  carzup-blog-db:
     image: postgres:15-alpine
     container_name: postgres
     restart: unless-stopped
@@ -37,7 +37,7 @@ services:
       - carzup_blog_network
 
   # Laravel API Service
-  backend:
+  carzup-blog-backend:
     image: ghcr.io/carzup/carzupblog/carzupblog_api:main
     container_name: carzup_backend
     restart: unless-stopped
@@ -60,12 +60,12 @@ services:
     ports:
       - "4389:4389"
     depends_on:
-      - db
+      - carzup-blog-db
     networks:
       - carzup_blog_network
 
   # Next.js Frontend Service
-  frontend:
+  carzup-blog-frontend:
     image: ghcr.io/carzup/carzupblog/carzupblog_frontend:main
     container_name: carzup_frontend
     restart: unless-stopped
@@ -76,7 +76,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      - carzup-blog-backend
     networks:
       - carzup_blog_network
 
