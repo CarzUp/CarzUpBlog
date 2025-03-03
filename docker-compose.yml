@@ -4,7 +4,7 @@ services:
 
   carzup-blog-watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
+    container_name: carzup-blog-watchtower
     command:
       - "--label-enable"
       - "--interval"
@@ -19,7 +19,7 @@ services:
   # PostgreSQL Database for Laravel API
   carzup-blog-db:
     image: postgres:15-alpine
-    container_name: postgres
+    container_name: carzup-blog-db
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -39,7 +39,7 @@ services:
   # Laravel API Service
   carzup-blog-backend:
     image: ghcr.io/carzup/carzupblog/carzupblog_api:main
-    container_name: carzup_backend
+    container_name: carzup-blog-backend
     restart: unless-stopped
     env_file:
       - .env
@@ -67,7 +67,7 @@ services:
   # Next.js Frontend Service
   carzup-blog-frontend:
     image: ghcr.io/carzup/carzupblog/carzupblog_frontend:main
-    container_name: carzup_frontend
+    container_name: carzup-blog-frontend
     restart: unless-stopped
     env_file:
       - .env
