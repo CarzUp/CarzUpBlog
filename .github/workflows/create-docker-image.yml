@@ -1,0 +1,75 @@
+name: Build and Publish Laravel API Docker Image
+
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - "API/**"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: CarzUp/CarzUpBlog/carzupblog_api
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up PHP environment (Optional: If PHP commands are needed)
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo, pdo_pgsql
+          coverage: none
+
+      # Step 3: Install dependencies (Optional: If you need to run artisan commands)
+      - name: Install Laravel dependencies
+        run: |
+          cd API
+          composer install --no-dev --optimize-autoloader
+          php artisan config:cache
+          php artisan route:cache
+
+      # Step 4: Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 5: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Step 6: Build and push the Docker image
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./API  # Path to the Laravel API Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_DATABASE=${{ secrets.DB_DATABASE }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            APP_KEY=${{ secrets.APP_KEY }}
