@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: CarzUp/CarzUpBlog/carzup_blog_frontend
+  IMAGE_NAME: CarzUp/CarzUpBlog/carzupblog_frontend
 
 jobs:
   build-and-push-image:
