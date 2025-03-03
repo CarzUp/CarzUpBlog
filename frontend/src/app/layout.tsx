@@ -4,7 +4,7 @@ import "./globals.css";
 import {TooltipProvider} from "@components/ui/tooltip";
 import {Toaster} from "@components/ui/toaster";
 import { Toaster as Sonner } from "@components/ui/sonner";
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+// import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import React from "react";
 import Navbar from "@components/layout/Navbar";
 import Footer from "@components/layout/Footer";
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const queryClient = new QueryClient();
+  // const queryClient = new QueryClient();
 
   return (
     <html lang="en">
