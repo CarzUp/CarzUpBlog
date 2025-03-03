@@ -5,13 +5,15 @@ import SharePost from "@components/post/SharePost";
 import Newsletter from "@components/home/Newsletter";
 import { blogPosts } from "@data/posts";
 
-interface PostPageProps {
-    params: { slug: string };
-}
+export default async function PostPage(props: {
+    params: Promise<{ slug: string }>;
+}) {
+    const params = await props.params;
+    const slug = params.slug;
 
-export default function PostPage({ params }: PostPageProps) {
-    const { slug } = params;
-    const post = blogPosts.find(post => post.slug === slug);
+    if (!blogPosts) return notFound();
+
+    const post = blogPosts.find(post => post.slug === slug)!;
 
     // Redirect to 404 if post doesn't exist
     if (!post) return notFound();
@@ -20,12 +22,12 @@ export default function PostPage({ params }: PostPageProps) {
         <>
             <div className="py-24">
                 <div className="container relative">
-                    <SharePost title={post.title} slug={post.slug} />
-                    <PostContent post={post} />
-                    <RelatedPosts currentPost={post} posts={blogPosts} />
+                    <SharePost title={post.title} slug={post.slug}/>
+                    <PostContent post={post}/>
+                    <RelatedPosts currentPost={post} posts={blogPosts}/>
                 </div>
             </div>
-            <Newsletter />
+            <Newsletter/>
         </>
     );
 }

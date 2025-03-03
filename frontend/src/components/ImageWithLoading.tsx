@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from "next/image";
 
 interface ImageWithLoadingProps {
   src: string;
@@ -12,8 +13,8 @@ const ImageWithLoading = ({ src, alt, className = '' }: ImageWithLoadingProps) =
   const [imageSrc, setImageSrc] = useState('');
 
   useEffect(() => {
-    const img = new Image();
-    img.src = src;
+    const img = new window.Image();
+    img.src = src ?? '';
     img.onload = () => {
       setImageSrc(src);
       setIsLoaded(true);
@@ -26,7 +27,7 @@ const ImageWithLoading = ({ src, alt, className = '' }: ImageWithLoadingProps) =
         className={`w-full h-full bg-gray-100 ${!isLoaded ? 'animate-pulse' : ''}`}
       ></div>
       {imageSrc && (
-        <img
+        <Image
           src={imageSrc}
           alt={alt}
           className={`absolute top-0 left-0 w-full h-full object-cover transition-all duration-700 ${

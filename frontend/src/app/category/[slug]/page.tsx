@@ -4,12 +4,11 @@ import PostCard from "@components/home/PostCard";
 import Newsletter from "@components/home/Newsletter";
 import { blogPosts, categories } from "@data/posts";
 
-interface CategoryPageProps {
-    params: { slug: string };
-}
-
-export default function CategoryPage({ params }: CategoryPageProps) {
-    const { slug } = params;
+export default async function CategoryPage(props: {
+    params: Promise<{ slug: string }>;
+}) {
+    const params = await props.params;
+    const slug = params.slug;
 
     const category = categories.find(cat => cat.slug === slug);
     const posts = blogPosts.filter(post => post.category.toLowerCase() === slug);
@@ -19,14 +18,14 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
     return (
         <>
-            <CategoryHeader category={category} count={posts.length} />
+            <CategoryHeader category={category} count={posts.length}/>
 
             <section className="py-16">
                 <div className="container">
                     {posts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {posts.map(post => (
-                                <PostCard key={post.id} post={post} />
+                                <PostCard key={post.id} post={post}/>
                             ))}
                         </div>
                     ) : (
@@ -40,7 +39,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 </div>
             </section>
 
-            <Newsletter />
+            <Newsletter/>
         </>
     );
 }

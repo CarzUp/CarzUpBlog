@@ -27,9 +27,9 @@ export default {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
                 ring: 'hsl(var(--ring))',
-                background: ({ opacityValue }) =>
+                background: ({ opacityValue }: { opacityValue?: number }) =>
                     opacityValue ? `hsl(var(--background) / ${opacityValue})` : `hsl(var(--background))`,
-                foreground: ({ opacityValue }) =>
+                foreground: ({ opacityValue }: { opacityValue?: number }) =>
                     opacityValue ? `hsl(var(--foreground) / ${opacityValue})` : `hsl(var(--foreground))`,
                 primary: {
                     DEFAULT: 'hsl(var(--primary))',
