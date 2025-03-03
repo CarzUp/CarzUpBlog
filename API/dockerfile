@@ -28,8 +28,11 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
+# Set permissions for entrypoint script
+RUN chmod +x /var/www/docker-entrypoint.sh
+
+# Set custom entrypoint
+ENTRYPOINT ["/var/www/docker-entrypoint.sh"]
+
 # Expose port 4389
 EXPOSE 4389
-
-# Start PHP-FPM server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=4389"]
