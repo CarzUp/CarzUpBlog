@@ -1,88 +1,151 @@
-version: "3.8"
-
+name: carzupblog
 services:
-
-  carzup-blog-watchtower:
-    image: containrrr/watchtower
-    container_name: carzup-blog-watchtower
-    command:
-      - "--label-enable"
-      - "--interval"
-      - "30"
-      - "--rolling-restart"
-    environment:
-      - REPO_USER=${GITHUB_USER}
-      - REPO_PASS=${GITHUB_PAT}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  # PostgreSQL Database for Laravel API
-  carzup-blog-db:
-    image: postgres:15-alpine
-    container_name: carzup-blog-db
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
-      start_period: 20s
-      interval: 30s
-      retries: 5
-      timeout: 5s
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - carzup_blog_network
-
-  # Laravel API Service
-  carzup-blog-backend:
-    image: ghcr.io/carzup/carzupblog/carzupblog_api:main
-    container_name: carzup-blog-backend
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      APP_ENV: production
-      APP_DEBUG: false
-      APP_URL: http://localhost:4389
-      DB_CONNECTION: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: ${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    ports:
-      - "4389:4389"
-    depends_on:
-      - carzup-blog-db
-    networks:
-      - carzup_blog_network
-
-  # Next.js Frontend Service
-  carzup-blog-frontend:
-    image: ghcr.io/carzup/carzupblog/carzupblog_frontend:main
-    container_name: carzup-blog-frontend
-    restart: unless-stopped
-    env_file:
-      - .env
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    ports:
-      - "3000:3000"
-    depends_on:
-      - carzup-blog-backend
-    networks:
-      - carzup_blog_network
-
+    carzup-blog-backend:
+        cpu_shares: 90
+        command: []
+        container_name: carzup-blog-backend
+        depends_on:
+            carzup-blog-db:
+                condition: service_started
+                required: true
+        deploy:
+            resources:
+                limits:
+                    memory: "16536043520"
+        environment:
+            APP_DEBUG: "false"
+            APP_ENV: production
+            APP_URL: http://localhost:4389
+            AUTHENTIK_SECRET_KEY: jwjtPXZwNJlmRJAJeZnpCcbs5r8eE6EsT6dlPkfXQcN/aMc9
+            DB_CONNECTION: pgsql
+            DB_DATABASE: CarzUpBlog
+            DB_HOST: localhost
+            DB_PASSWORD: Admin123123!
+            DB_PORT: "5432"
+            DB_USERNAME: postgres
+            GITHUB_USER: AzSumToshko
+            POSTGRES_DB: CarzUpBlog
+            POSTGRES_PASSWORD: Admin123123!
+            POSTGRES_USER: postgres
+            REDIS_HOST: redis
+            REDIS_PORT: "6379"
+        env_file:
+            - /home/azsumtoshko/CarzUpBlog/.env
+        hostname: carzup-blog-backend
+        image: ghcr.io/carzup/carzupblog/carzupblog_api:main
+        labels:
+            com.centurylinklabs.watchtower.enable: "true"
+        networks:
+            carzup_blog_network: null
+        ports:
+            - mode: ingress
+              target: 4389
+              published: "4389"
+              protocol: tcp
+        restart: unless-stopped
+    carzup-blog-db:
+        cpu_shares: 90
+        command: []
+        container_name: carzup-blog-db
+        deploy:
+            resources:
+                limits:
+                    memory: "16536043520"
+        environment:
+            POSTGRES_DB: CarzUpBlog
+            POSTGRES_PASSWORD: Admin123123!
+            POSTGRES_USER: postgres
+        hostname: carzup-blog-db
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}
+            timeout: 5s
+            interval: 30s
+            retries: 5
+            start_period: 20s
+        image: postgres:15-alpine
+        networks:
+            carzup_blog_network: null
+        restart: unless-stopped
+        volumes:
+            - type: volume
+              target: /DATA/AppData/carzup-blog
+              volume: {}
+    carzup-blog-frontend:
+        cpu_shares: 90
+        command: []
+        container_name: carzup-blog-frontend
+        depends_on:
+            carzup-blog-backend:
+                condition: service_started
+                required: true
+        deploy:
+            resources:
+                limits:
+                    memory: "16536043520"
+        environment:
+            AUTHENTIK_SECRET_KEY: jwjtPXZwNJlmRJAJeZnpCcbs5r8eE6EsT6dlPkfXQcN/aMc9
+            GITHUB_USER: AzSumToshko
+            POSTGRES_DB: CarzUpBlog
+            POSTGRES_PASSWORD: Admin123123!
+            POSTGRES_USER: postgres
+        env_file:
+            - /home/azsumtoshko/CarzUpBlog/.env
+        hostname: carzup-blog-frontend
+        image: ghcr.io/carzup/carzupblog/carzupblog_frontend:main
+        labels:
+            com.centurylinklabs.watchtower.enable: "true"
+        networks:
+            carzup_blog_network: null
+        ports:
+            - mode: ingress
+              target: 3000
+              published: "3000"
+              protocol: tcp
+        restart: unless-stopped
+    carzup-blog-watchtower:
+        cpu_shares: 90
+        command:
+            - --label-enable
+            - --interval
+            - "30"
+            - --rolling-restart
+        container_name: carzup-blog-watchtower
+        deploy:
+            resources:
+                limits:
+                    memory: "16536043520"
+        environment:
+            REPO_USER: AzSumToshko
+        hostname: carzup-blog-watchtower
+        image: containrrr/watchtower:latest
+        networks:
+            default: null
+        restart: unless-stopped
+        volumes:
+            - type: bind
+              source: /var/run/docker.sock
+              target: /var/run/docker.sock
+              bind:
+                create_host_path: true
 networks:
-  carzup_blog_network:
-    driver: bridge
-
+    carzup_blog_network:
+        name: carzupblog_carzup_blog_network
+        driver: bridge
+    default:
+        name: carzupblog_default
 volumes:
-  db_data:
+    db_data:
+        name: carzupblog_db_data
+x-casaos:
+    author: self
+    category: self
+    hostname: 192.168.0.111
+    icon: ""
+    index: /
+    is_uncontrolled: false
+    port_map: "3000"
+    scheme: http
+    title:
+        custom: CarzUp Blog
