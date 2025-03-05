@@ -43,6 +43,21 @@ class PostController extends Controller
         return response()->json(new PostResource($post));
     }
 
+    public function checkTitle(Request $request): JsonResponse
+    {
+        // Validate request
+        $request->validate([
+            'title' => 'required|string|max:255'
+        ]);
+
+        // Check if the title exists
+        $exists = Post::where('title', $request->query('title'))->exists();
+
+        return response()->json([
+            'exists' => $exists
+        ], 200);
+    }
+
     public function store(PostRequest $request): JsonResponse
     {
         $post = $this->postService->createPost($request->validated());

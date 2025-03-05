@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 
-Route::middleware('api')->prefix('posts')->group(function () {
+Route::middleware('api')->group(function () {
 
     /**
      * @OA\Get(
@@ -31,11 +31,13 @@ Route::middleware('api')->prefix('posts')->group(function () {
      *     )
      * )
      */
-    Route::get('/', [PostController::class, 'index']);
+    Route::get('/posts/', [PostController::class, 'index']);
 
-    Route::get('/slug/{slug}', [PostController::class, 'getBySlug']);
+    Route::get('/posts/slug/{slug}', [PostController::class, 'getBySlug']);
 
     Route::get('/statistics/all', [PostController::class, 'getPostStatistics']);
+
+    Route::get('/check-title', [PostController::class, 'checkTitle']);
 
     /**
      * @OA\Post(
@@ -53,7 +55,7 @@ Route::middleware('api')->prefix('posts')->group(function () {
      *     )
      * )
      */
-    Route::post('/', [PostController::class, 'store']);
+    Route::post('/posts', [PostController::class, 'store']);
 
     /**
      * @OA\Get(
@@ -79,7 +81,7 @@ Route::middleware('api')->prefix('posts')->group(function () {
      *     )
      * )
      */
-    Route::get('{post}', [PostController::class, 'show']);
+    Route::get('/posts/{post}', [PostController::class, 'show']);
 
     /**
      * @OA\Put(
@@ -109,7 +111,7 @@ Route::middleware('api')->prefix('posts')->group(function () {
      *     )
      * )
      */
-    Route::put('{post}', [PostController::class, 'update']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
 
     /**
      * @OA\Delete(
@@ -135,5 +137,5 @@ Route::middleware('api')->prefix('posts')->group(function () {
      *     )
      * )
      */
-    Route::delete('{post}', [PostController::class, 'destroy']);
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
 });
