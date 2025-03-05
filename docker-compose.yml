@@ -19,7 +19,7 @@ services:
             AUTHENTIK_SECRET_KEY: jwjtPXZwNJlmRJAJeZnpCcbs5r8eE6EsT6dlPkfXQcN/aMc9
             DB_CONNECTION: pgsql
             DB_DATABASE: CarzUpBlog
-            DB_HOST: localhost
+            DB_HOST: carzup-blog-db
             DB_PASSWORD: Admin123123!
             DB_PORT: "5432"
             DB_USERNAME: postgres
@@ -36,7 +36,7 @@ services:
         labels:
             com.centurylinklabs.watchtower.enable: "true"
         networks:
-            carzup_blog_network: null
+            carzupblog_default: null
         ports:
             - mode: ingress
               target: 4389
@@ -59,14 +59,14 @@ services:
         healthcheck:
             test:
                 - CMD-SHELL
-                - pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}
+                - pg_isready -d CarzUpBlog -U postgres
             timeout: 5s
             interval: 30s
             retries: 5
             start_period: 20s
         image: postgres:15-alpine
         networks:
-            carzup_blog_network: null
+            carzupblog_default: null
         restart: unless-stopped
         volumes:
             - type: volume
@@ -97,7 +97,7 @@ services:
         labels:
             com.centurylinklabs.watchtower.enable: "true"
         networks:
-            carzup_blog_network: null
+            carzupblog_default: null
         ports:
             - mode: ingress
               target: 3000
@@ -121,7 +121,7 @@ services:
         hostname: carzup-blog-watchtower
         image: containrrr/watchtower:latest
         networks:
-            default: null
+            carzupblog_default: null
         restart: unless-stopped
         volumes:
             - type: bind
@@ -130,14 +130,10 @@ services:
               bind:
                 create_host_path: true
 networks:
-    carzup_blog_network:
-        name: carzupblog_carzup_blog_network
-        driver: bridge
+    carzupblog_default:
+        name: carzupblog_default
     default:
         name: carzupblog_default
-volumes:
-    db_data:
-        name: carzupblog_db_data
 x-casaos:
     author: self
     category: self
