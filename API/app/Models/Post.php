@@ -57,11 +57,4 @@ class Post extends Model
             $post->slug = $count ? "{$slug}-" . ($count + 1) : $slug;
         });
     }
-
-    public function content(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => Str::markdown($value), // Converts Markdown to HTML
-        );
-    }
 }
