@@ -8,6 +8,7 @@ const nextConfig = {
 
   images: {
     domains: ["*"],
+    unoptimized: true, // Disable optimization if necessary
     remotePatterns: [
       {
         protocol: 'https',
