@@ -1,0 +1,498 @@
+{
+  "name": "CarzUp BlogPost Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            },
+            {
+              "triggerAtHour": 14
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1740,
+        -680
+      ],
+      "id": "a52444d6-cfc8-44eb-9028-a59e876f13c7",
+      "name": "8AM 2PM"
+    },
+    {
+      "parameters": {
+        "url": "https://blog-api.carzup.world/api/statistics/all",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1520,
+        -680
+      ],
+      "id": "dd156080-4e15-4edc-8209-aad1d1e113c6",
+      "name": "Least posts category",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ai.carzup.world/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistral\",\n  \"prompt\": \"Generate only a final, fully written car blog post title related to {{ $json.least_type.type }}. The title must be specific to automobiles, such as cars, trucks, electric vehicles, car brands, new car technologies, car reviews, or auto industry trends. Do NOT include unrelated topics. The response will be displayed directly, so it must be polished and free of unnecessary punctuation such as extra quotes.\",\n  \"stream\": false\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1280,
+        -680
+      ],
+      "id": "47e72554-2c3c-4a4d-83f0-027eb6de1b5d",
+      "name": "Generate Topic"
+    },
+    {
+      "parameters": {
+        "url": "=https://blog-api.carzup.world/api/check-title?title={{ $json.clean_topic }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -880,
+        -680
+      ],
+      "id": "725819f3-4107-4c46-b268-51bd3e442e35",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "let rawText = $input.first().json.response || \"\";\n\n// Remove HTML tags and unnecessary spaces/newlines\nlet cleanText = rawText\n    .replace(/(<([^>]+)>)/gi, \"\")  // Strip HTML\n    .replace(/[\\n\\r\\t]+/g, \" \")    // Normalize spaces\n    .replace(/^\\s*[\"']|[\"']\\s*$/g, \"\") // Trim leading/trailing quotes\n    .trim();\n\nreturn [{ json: { clean_topic: cleanText } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1060,
+        -680
+      ],
+      "id": "d5f4b26c-7f04-4c9c-a673-e1f376e965ec",
+      "name": "Format response"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.exists }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "bd72f95a-7921-405c-a7e6-539cd9a6b231"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dd772709-45be-4b63-bf7e-80293746eb31",
+                    "leftValue": "={{ $json.exists }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -660,
+        -680
+      ],
+      "id": "4fc7c08d-b322-4761-902a-5a2d73ce09bf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ruNsQgy8r373ElhGPdMxbFqNOY7VKXVIPvaqBglt-Uo",
+          "mode": "list",
+          "cachedResultName": "CarzUp Blogpost Titles",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ruNsQgy8r373ElhGPdMxbFqNOY7VKXVIPvaqBglt-Uo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ruNsQgy8r373ElhGPdMxbFqNOY7VKXVIPvaqBglt-Uo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Generated Topic": "={{ $('Format response').item.json.clean_topic }}",
+            "Post Type": "={{ $('Least posts category').item.json.least_type.type }}",
+            "Status": "Checking"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Generated Topic",
+              "displayName": "Generated Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post Type",
+              "displayName": "Post Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1740,
+        -400
+      ],
+      "id": "958c61e6-3ef6-40ff-abb2-c3df6d3887a1",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BUeGglfJQaX280FC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an advanced AI content writer. Your task is to generate a high-quality, long-form blog post based on the given title. The blog post should be well-structured, engaging, and informative while being written in plain text with no HTML tags.\n\nBlog Post Requirements:\n\nDO NOT generate a title—only return the blog content.\n\nWrite a compelling introduction that hooks the reader.\n\nStructure the content naturally, using clear paragraphs with logical flow.\n\nUse line breaks between paragraphs for readability.\n\nInclude subtopics and sections naturally without using any formatting tags.\n\nLists should be formatted using dashes (-) or numbered lists (1.).\n\nEnsure the blog post is informative, valuable, and free of fluff.\n\nDO NOT include HTML tags, markdown symbols, or formatting characters—only plain text.\n\nBlog Post Title:\n{{ $('Format response').item.json.clean_topic }}\n\nExample AI Response (Correctly Generated Blog Post in Plain Text):\n\nElectric vehicles (EVs) have been gaining popularity in recent years, offering an eco-friendly and cost-effective alternative to traditional gasoline-powered cars. As more manufacturers invest in EV technology, many people are wondering if making the switch is the right choice.\n\nAdvantages of Electric Vehicles\n\nOne of the main reasons people choose electric cars is their environmental benefits. Unlike gas-powered vehicles, EVs produce zero tailpipe emissions, which helps reduce air pollution and combat climate change.\n\nCost Savings\n\nThough electric cars can have a higher upfront cost, they often save owners money in the long run. Here are some key financial benefits:\n\nNo fuel expenses, as charging an EV is significantly cheaper than refueling a gas-powered car.\n\nLower maintenance costs due to fewer moving parts and no need for oil changes.\n\nGovernment incentives, tax credits, and rebates that make EVs more affordable.\n\nChallenges of Owning an EV\n\nDespite their many benefits, electric vehicles also come with some challenges. One of the biggest concerns is the availability of charging stations. While home charging is convenient, long-distance travel may require careful planning.\n\nBattery Life and Range\n\nBattery technology has improved significantly, but range anxiety remains a concern for some drivers. Charging times vary depending on the type of charger used, and extreme weather conditions can impact battery performance.\n\nConclusion\n\nElectric cars are shaping the future of transportation, offering numerous benefits in terms of cost savings and environmental impact. However, potential buyers should carefully consider factors like charging infrastructure, battery life, and initial costs before making a decision. As EV technology continues to evolve, it’s likely that adoption rates will only continue to rise.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1480,
+        -400
+      ],
+      "id": "a6e3cf05-bc93-4d04-8d2d-bfe449816662",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": "mistral:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1560,
+        -200
+      ],
+      "id": "ca233d76-6cd6-46ee-b5a5-e7457c80e5ae",
+      "name": "Ollama Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "ollamaApi": {
+          "id": "yS7mKNAjtPufRMsc",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://blog-api.carzup.world/api/posts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"title\": \"{{ $('Format response').item.json.clean_topic }}\",\n    \"author\": \"Unufri Kalkin\",\n    \"content\": \"{{ $json.formattedOutput }}\",\n    \"tags\": [\"cars\", \"{{ $('Least posts category').item.json.least_type.type }}\"],\n    \"image\": \"https://example.com/main-image.jpg\",\n    \"gallery\": [\n        \"https://example.com/image1.jpg\",\n        \"https://example.com/image2.jpg\",\n        \"https://example.com/image3.jpg\"\n    ],\n    \"status\": \"published\",\n    \"type\": \"{{ $('Least posts category').item.json.least_type.type }}\",\n    \"published_at\": \"{{ $('8AM 2PM').item.json.timestamp }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -960,
+        -400
+      ],
+      "id": "c0ed9147-0689-479b-b654-dd55b0a24465",
+      "name": "Save BlogPost"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=NEW Blogpost:  {{ $json.post.title }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        -400
+      ],
+      "id": "e9bcc11d-4272-4041-8b5e-c48a8c439c68",
+      "name": "Discord",
+      "webhookId": "de70f2ec-b857-4019-8ca1-032e903868b6",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "4HAjBJr1cArpl3Bg",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -400
+      ],
+      "id": "0849053b-2a3a-4efe-bce0-074b453ea1bb",
+      "name": "Finish"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all()[0].json.output;\n\nconst formattedOutput = input.replace(/\\n/g, 'newLine');\n\nreturn [{ json: { formattedOutput } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1140,
+        -400
+      ],
+      "id": "a2235f4c-d290-4d6b-827f-d3beec4369c7",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "8AM 2PM": {
+      "main": [
+        [
+          {
+            "node": "Least posts category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Least posts category": {
+      "main": [
+        [
+          {
+            "node": "Generate Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Topic": {
+      "main": [
+        [
+          {
+            "node": "Format response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format response": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Generate Topic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save BlogPost": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        [
+          {
+            "node": "Finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Save BlogPost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a4e4e19c-c247-4566-a29f-4940772e2baf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "11fe1b6fdf9ce6bae644eb147b4a4a6b3b39be4c59b23bcaeeb03a3b679720a8"
+  },
+  "id": "adyGaSfx9beHPMOK",
+  "tags": []
+}
